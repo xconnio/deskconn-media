@@ -16,12 +16,12 @@ import (
 
 	"github.com/xconnio/deskconn/appkit"
 	mediaapp "github.com/xconnio/media-app"
-	"github.com/xconnio/xconn-go"
+	"github.com/xconnio/xconn/bindings/go"
 )
 
 const (
-	procedureKeyExchange = "io.xconn.media.key.exchange"
-	procedureIndexQuery  = "io.xconn.media.index.query"
+	procedureKeyExchange = "com.deskconn.media.key.exchange"
+	procedureIndexQuery  = "com.deskconn.media.index.query"
 )
 
 type app struct {
@@ -97,7 +97,7 @@ func (m *media) serve(ctx context.Context, uri string) error {
 		if len(event.Args()) > 0 {
 			m.applyCapabilities(ctx, event.Args()[0])
 		}
-	}).Do()
+	}).Execute()
 	if subResp.Err != nil {
 		return subResp.Err
 	}
@@ -105,15 +105,15 @@ func (m *media) serve(ctx context.Context, uri string) error {
 	if err != nil {
 		return err
 	}
-	if resp := session.Call(appkit.ProcedureAppsRegister).Args(payload).Do(); resp.Err != nil {
+	if resp := session.Call(appkit.ProcedureAppsRegister).Args(payload).Execute(); resp.Err != nil {
 		return fmt.Errorf("could not register apps: %w", resp.Err)
 	}
-	listResp := session.Call(appkit.ProcedureCapabilitiesList).Do()
+	listResp := session.Call(appkit.ProcedureCapabilitiesList).Execute()
 	if listResp.Err != nil {
 		return listResp.Err
 	}
-	if len(listResp.Args()) > 0 {
-		m.applyCapabilities(ctx, listResp.Args()[0])
+	if len(listResp.Args) > 0 {
+		m.applyCapabilities(ctx, listResp.Args[0])
 	}
 	log.Println("media-app: connected to deskconnd")
 
@@ -165,7 +165,7 @@ func (m *media) setServing(on bool) error {
 		m.query = nil
 		return err
 	}
-	resp := m.session.Register(procedureIndexQuery, m.enc.Encrypted(m.handleQuery)).Do()
+	resp := m.session.Register(procedureIndexQuery, m.enc.Encrypted(m.handleQuery)).Execute()
 	if resp.Err != nil {
 		return resp.Err
 	}
