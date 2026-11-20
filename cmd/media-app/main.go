@@ -105,7 +105,7 @@ func (m *media) serve(ctx context.Context, uri string) error {
 	if err != nil {
 		return err
 	}
-	if resp := session.Call(appkit.ProcedureAppsRegister).Args(payload).Execute(); resp.Err != nil {
+	if resp := session.Call(appkit.ProcedureAppRegister).Args(payload).Execute(); resp.Err != nil {
 		return fmt.Errorf("could not register apps: %w", resp.Err)
 	}
 	listResp := session.Call(appkit.ProcedureCapabilitiesList).Execute()
